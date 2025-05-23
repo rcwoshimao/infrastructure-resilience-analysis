@@ -11,5 +11,6 @@ Final project for DSC 80, Practice and Application of Data Science at UCSD
 
 # Contributors 
 Jiaying Chen| [github](https://github.com/rcwoshimao) | [linkedin](https://www.linkedin.com/in/jiaying-chen01/)
+
 Minh Hoang | [github](https://github.com/thekingofrice) | [linkedin](https://www.linkedin.com/in/duc-minh-hoang-711029296/)
 
