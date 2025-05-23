@@ -1,9 +1,7 @@
 # dsc80-final-project
 Final project for DSC 80, Practice and Application of Data Science at UCSD
 
-
-# (Project main document)[https://docs.google.com/document/d/159BZ_1Zo0wrCYdng55QQ1Y5XzwdtRrC7TWio_lKU6Bo/edit?usp=sharing]
-
+# [Project main document](https://docs.google.com/document/d/159BZ_1Zo0wrCYdng55QQ1Y5XzwdtRrC7TWio_lKU6Bo/edit?usp=sharing)
 
 
 
