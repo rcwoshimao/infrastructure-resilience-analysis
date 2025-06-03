@@ -1,1 +1,6 @@
 *.csv
+_site/
+.bundle/
+jekyll-cache/
+.venv/
+vendor/
