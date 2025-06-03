@@ -21,9 +21,8 @@ highlight_theme: default # "default" (default), "tomorrow", "tomorrow-night", "t
 url: "https://rcwoshimao.github.io"
 baseurl: "/infrastructure-resilience-analysis"
 
-title   : "Infrastructure Resilience Analysis"
-description: > # this means to ignore newlines until "Language & timezone"
-  Your Site Description
+title   : "Analysis on U.S. Electrical Power Infrastructure Resilience"
+description: "Hellow this is a descripiton" 
 
 
 ## => Language and Timezone
@@ -36,7 +35,7 @@ timezone: # see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for
 ##############################
 author:
   type      : # "person" (default), "organization"
-  name      : Your Name
+  name      : Jiaying Chen
   url       :
   avatar    : # path or url of avatar image (square)
   bio       : I am an amazing person.
@@ -65,7 +64,7 @@ repository_tree: master
 paths:
   root    : # title link url, "/" (default)
   home    : # home layout url, "/" (default)
-  archive : # "/archive.html" (default)
+  # archive : # "/archive.html" (default)
   rss     : # "/feed.xml" (default)
 
 
@@ -92,7 +91,7 @@ mathjax_autoNumber: # false (default), true
 mermaid: # false (default), true
 
 ## Chart
-chart: # false (default), true
+chart: true # false (default), true
 
 
 ## => Paginate
