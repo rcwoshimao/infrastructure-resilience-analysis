@@ -588,6 +588,59 @@ After merning, the head of our final dataframe `outage` can be seen below.
 
 ## Exploratory Data Analysis
 
+<iframe
+  src="assets/plots/avg_outage_duration.html"
+  width="800"
+  height="600"
+  frameborder="0"
+></iframe>
+
+<iframe
+  src="assets/plots/anomaly_by_state.html"
+  width="800"
+  height="600"
+  frameborder="0"
+></iframe>
+
+
+<iframe
+  src="assets/plots/cause_wordcloud.html"
+  width="800"
+  height="600"
+  frameborder="0"
+></iframe>
+
+
+<iframe
+  src="assets/plots/climate_cause_pie.html"
+  width="800"
+  height="600"
+  frameborder="0"
+></iframe>
+
+
+<iframe
+  src="assets/plots/climate_region_cntplot.html"
+  width="800"
+  height="600"
+  frameborder="0"
+></iframe>
+
+
+<iframe
+  src="assets/plots/count_heatmap.html"
+  width="800"
+  height="600"
+  frameborder="0"
+></iframe>
+
+
+<iframe
+  src="assets/plots/log_duration.html"
+  width="800"
+  height="600"
+  frameborder="0"
+></iframe>
 
 ---
 
