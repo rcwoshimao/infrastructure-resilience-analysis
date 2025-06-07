@@ -929,14 +929,8 @@ Although our results do not support a statistically significant relationship in 
 
 ---
 
-# Framing a Prediction Problem
-Clearly state your prediction problem and type (classification or regression). If you are building a classifier, make sure to state whether you are performing binary classification or multiclass classification. Report the response variable (i.e. the variable you are predicting) and why you chose it, the metric you are using to evaluate your model and why you chose it over other suitable metrics (e.g. accuracy vs. F1-score).
+# Framing a Prediction Problem [TODO]
 
-Note: Make sure to justify what information you would know at the “time of prediction” and to only train your model using those features. For instance, if we wanted to predict your final exam grade, we couldn’t use your Final Project grade, because the project is only due after the final exam! Feel free to ask questions if you’re not sure.
-
-With the above features 
-
-*Describe how you framed your problem as a prediction task, including defining inputs and outputs.*
 
 ---
 
@@ -975,15 +969,89 @@ We can improve by choosing more variables to work with and let the RFG optimize 
 
 # Final Model
 
-*Describe your final model, how it was trained and tuned, and its performance compared to the baseline.*
+In order to narrow down which features to use, we will analyze multicollinearity to rule out columns that may not contribute much to our model given the features that are already in it.
+
+<iframe
+  src="assets/plots/covariance_heatmap.html"
+  width="1000"
+  height="1000"
+  frameborder="0"
+></iframe>
+
+
+We sense that there is a strong multicollinearity pattern among the columns that are related to population, for example:
+
+- `population`
+- `pop_pct_urban`
+- `pop_pct_uc`
+- `popden_urban`
+- `popden_uc`
+- `popden_rural`
+- `area_pct_urban`
+- `area_pct_uc`
+
+
+This is to be expected since they all, in one way or another tie back to the population of their respective states. This means that they are dependent columns and this introduces multicollinearity. That is to say, since we already have the population feature in our model, there isn't a need to include these other population-based features.
+
+Other notable multicollinearity occurrences are between the Shannon Entropy columns against the columns in our original dataframe that correspond to geographical elements (i.e. not anomaly level, duration, avergae duration, or pc_realgsp_state). 
+
+So, it might not be the best idea to use geographical elements along with the capacity and generation indeces.
+
+Despite us showing you which columns have high correlation with one another, it is important to focus on the main objective with our model, **prediction**. And so, since multicollinearity does not affect our prediction power, only the statistical significance of the covariates, we need not worry about it for now. Although, it would be interesting to see.
+
+We would like to one hot encode the state column to see if there are any states that have have a say in the average duration of outages. Based on our EDA, it would seem that this may be the case due to the sheer amount of outages happening in some states. For example CA, TX, and WA have yearly outage count of over 20.
+
+Proposition
+
+Since **Random Forest Regression** shows promise in the baseline model, performing a lot better than Linear Regression, we will choose to use it here for our model refinement. Through GridSearch cross validation, we hope to fine tune its hyperparameters (depth for overfitting, number of trees for variance reduction)
+
+Here's what tuning hyperparameters can do for us:
+
++ Each decision tree in the forest is trained on a random sample with replacement of the training data.
++ This sampling introduces diversity among the trees which is to say the trees are less dependent on each other and reduces bias.
++ The model then averages the predictions from all trees, which reduces variance of the ensemble (by the law of large numbers).
+
+So we have decided to tune on the following hyperparameters:
+
+| Hyperparameter      | What it Affects                                                        |
+| ------------------- | ---------------------------------------------------------------------- |
+| `n_estimators`   (int)      | More trees generally reduce variance, but take longer                  |
+| `max_depth`   (int)         | Limits complexity; larger values may overfit                           |
+| `max_features`   (int)      | Controls the randomness of splits; smaller values = more diverse trees |
+| `bootstrap`   (boolean)         | Enables bootstrapping (random sampling with replacement)               |
+
+| **Metric**          | **Baseline RF Model** | **Tuned RF Model** | **Improvement** |
+| ------------------- | --------------------- | ------------------ | --------------- |
+| `max_depth`         | Default (None)        | 30                 | Tuned           |
+| `n_estimators`      | 2000         | 500                | Increased       |
+| `max_features`      | Default ('auto')      | 'sqrt'             | Changed         |
+| `bootstrap`         | True                  | False              | Changed         |
+| **RMSE (Test Set)** |   **2235.2967521114506** | **2166.9378956680084** | **↓ 3.0581557%**  |
+| **Percent RMSE**    | **85.54457245365353%**  | **82.92848619641265%**   | **↓ 2.6161%**     |
+
 
 ---
-
 # Fairness Analysis
+To assess model fairness, we choose group the cause category by severe weather or no severe weather. Since our model focuses on average duration based on the predictive power of population, geographical, and energy generation/storage factors, we want to know if the model is actually performing well on severe weather or not. This is an interesting way to answer the question of "How good is the model in identifying natural causes and appropriate assign weights to those causes so that it is predicting average duration fairly?". We will see whether or not our model is robust under why the outage happened. 
 
-*Analyze the fairness of your model, any biases detected, and potential implications.*
+it is fitting to test whether or not the model performs well on different groups of climate categories. Specifically, we want to see if the average outage duration is well modeled on severe weather and no severe weather in hopes to bring up awareness of risks that come with outages.
+
+<iframe
+  src="assets/plots/fairness.html"
+  width="800"
+  height="400"
+  frameborder="0"
+></iframe>
+
+The permutation test yielded a p-value of approximately `0.003992`, which is well below the common significance threshold of 0.05. This indicates a statistically significant difference in the model’s predicted average outage durations between the severe weather and non-severe weather groups. In other words, the model’s performance varies depending on the cause category, suggesting it may not be equally accurate or fair across these groups.
+
+This finding highlights that while the model captures general trends, it might under- or over-estimate outage durations associated with severe weather events compared to other causes. Addressing this disparity could be important to improve model fairness and ensure it reliably informs decisions related to natural cause outages.
+
+
+
 
 ---
+
 
 
 
