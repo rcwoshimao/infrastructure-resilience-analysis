@@ -1,6 +1,6 @@
 ---
 layout: article
-title: How Electric Generation Infrastructure and Fuel Diversity Influence Frid Resilience Across U.S. States
+title: How Electric Generation Infrastructure and Fuel Diversity Influence Grid Resilience Across U.S. States
 mode: immersive
 mathjax: true
 header:
@@ -14,7 +14,7 @@ article_header:
     src: /assets/images/cover.jpg
 ---
 
-*By Jiaying Chen, Minh Hoang*
+*By Jiaying Chen, Duc Minh Hoang*
 
 ## Table of Contents
 
@@ -44,9 +44,15 @@ We investigate the relationship between generation capacity, fuel source diversi
 - Explored the question "Do states with more diverse energy portfolios experiences fewer or shorter outages?" 
 - ...And Created a prediction model utilizing features described above to predict the duration of an outage. 
 
+Understanding the causes and characteristics of major power outages is more critical than ever in today’s climate-challenged and energy-dependent world. Our dataset combines detailed records of U.S. outage events with regional economic, environmental, and energy generation data, offering a rare opportunity to explore how infrastructure resilience varies across states.
+By building a model to predict average outage duration based on interpretable features that are known ahead of time, our project aims to offer a small but practical step toward using data to better understand grid reliability.
+
 ### Data
 
-Our main dataset is from ScienceDirect: *[Data on major power outage events in the continental U.S.](https://www.sciencedirect.com/science/article/pii/S2352340918307182)*. Below are descriptions of the columns we used in the scope of this project. 
+Our main dataset is from ScienceDirect: *[Data on major power outage events in the continental U.S.](https://www.sciencedirect.com/science/article/pii/S2352340918307182)*.    
+
+**The raw dataset has 1534 rows and 56 columns.**    
+Below are descriptions of the columns we used in the scope of this project. 
 
 
 | **Column Name(s)**                               | **Description** |
@@ -65,13 +71,11 @@ Our main dataset is from ScienceDirect: *[Data on major power outage events in t
 
 
 Besides the main dataset, we also utilized the *[EIA-860 Annual Electric Generator Report](https://www.eia.gov/electricity/data/eia860/)*, and the *[EIA-923 Power Plant Operations Report](https://www.eia.gov/electricity/data/eia923/)*. Descriptions of meaningful columns are listed below.  
->The survey Form EIA-860 collects generator-level specific information about existing and planned generators and associated environmental equipment at electric power plants with 1 megawatt or greater of combined nameplate capacity. Summary level data can be found in the Electric Power Annual.
+>The survey Form EIA-860 collects generator-level specific information about existing and planned generators and associated environmental equipment at electric power plants with 1 megawatt or greater of combined nameplate capacity. Summary level data can be found in the Electric Power Annual.  
 
-<u>💡  The columns have been renamed to `['year', 'state', 'producer type', 'fuel source', 'generators', 'facilities', 'nameplate_capacity', 'summer_capacity']` from the original dataframe, in the original order, for easier access.</u>
+**This raw dataset has 62282 rows and 5 columns.**    
+💡  The columns have been renamed to `['year', 'state', 'producer type', 'fuel source', 'generators', 'facilities', 'nameplate_capacity', 'summer_capacity']` from the original dataframe, in the original order, for easier access.
 
->The survey Form EIA-923 collects detailed electric power data -- monthly and annually -- on electricity generation, fuel consumption, fossil fuel stocks, and receipts at the power plant and prime mover level.
-
-<u>💡  The columns have been renamed to `['year', 'state', 'producer_type', 'fuel_source', 'generation_mwh']` from the original dataframe, in the original order, for easier access.</u>
 
 
 | **EIA-860 Annual Electric Generator Report: Columns**                         | **Description**                                                                          |
@@ -82,6 +86,12 @@ Besides the main dataset, we also utilized the *[EIA-860 Annual Electric Generat
 | **`facilities`**                     | Name or count of facilities associated with generation (may contain missing data).       |
 | **`nameplate_capacity`** | Maximum output capacity of a generator under ideal conditions, in megawatts (MW).        |
 | **`summer_capacity'`**    | Expected maximum output of a generator during summer peak conditions, in megawatts (MW). |
+
+>The survey Form EIA-923 collects detailed electric power data -- monthly and annually -- on electricity generation, fuel consumption, fossil fuel stocks, and receipts at the power plant and prime mover level.
+
+**This raw dataset has 54002 rows and 8 columns.**      
+💡  The columns have been renamed to `['year', 'state', 'producer_type', 'fuel_source', 'generation_mwh']` from the original dataframe, in the original order, for easier access.
+
 
 | **EIA-923 Power Plant Operations Report: Columns**                         | **Description**                                                                          |
 | ---------------------------------- | ---------------------------------------------------------------------------------------- |
@@ -95,8 +105,8 @@ Besides the main dataset, we also utilized the *[EIA-860 Annual Electric Generat
 ## Data Cleaning
 ### "outage" dataframe 
 #### Data cleaning 
-We have first renamed our columns for better readability.    
-Since we will be focusing on assessing infrastructure resilience by state based on investment and other economic factors, we have dropped many climate or sales related columns, including outage-specific information that correlate to duration, climate conditiojns, demand-side data like total price, sales and customers, and state economy related columns. The remaining columns are listed here. 
+
+We began by renaming columns for improved readability and dropped many columns related to climate, sales, and outage-specific details that were less relevant to assessing infrastructure resilience from an economic and investment perspective. For example, columns related to outage duration drivers, demand-side metrics like total price or customers, and some state economy indicators were removed. The resulting columns retained include key variables such as year, state, climate region, outage duration, economic indicators, population metrics, and state-level outage summaries. The remaining columns are listed here. 
 
 ```python 
 Index(['year', 'state', 'climate_region', 'anomaly_level', 'climate_cat',
@@ -110,7 +120,7 @@ Index(['year', 'state', 'climate_region', 'anomaly_level', 'climate_cat',
 
 Some other small changes we made include: 
 - Replacing `state` column with `posta_code`, to be consistent with external dataframe. 
-- Dropping columns with `NaN` state and years, since those are crucial to our analysis. 
+- Dropping columns with `NaN` state and years to maintain data integrity.
 - Converted numerical columns to numerical, like `duration`, and cleaned the text of `cause_detail` for EDA later.    
 
 #### Feature Engineering 
@@ -281,7 +291,10 @@ The head of the final dataframe can be seen here.
 <!-- Dataframe ends -->
 
 ### "capacity" and "generated" dataframe 
-We were originally going to using capacity per capita, but this didnt work because there are too many missing population values in state-year population pairs. After doing some research, we decided to engineer the features `capacity_fuel_diversity_index` and `generation_fuel_diversity_index`, by converting the info in our dataframe into **Shannon Entropy**. 
+
+The raw capacity and generation datasets contained several inconsistencies, such as population data missing for many state-year pairs, capacity and generation values recorded as strings with commas, and fuel source categories varying in aggregation. We filtered data to the years 2000 to 2016 to ensure completeness and consistency. Numeric columns had commas removed and were converted to numeric types to enable calculations. For capacity, we kept only rows where fuel source was “All Sources” to represent total installed capacity, and for generation, we excluded rows labeled “Total” to focus on individual fuel sources. Missing or invalid values in generation were dropped. These cleaning steps ensured that the data was accurate and consistent for calculating diversity indices. 
+
+We were originally going to use capacity per capita as a feature, but this didnt work because there are too many missing population values in state-year population pairs. After doing some research, we decided to engineer the features `capacity_fuel_diversity_index` and `generation_fuel_diversity_index`, by converting the info in our dataframe into **Shannon Entropy**. 
 
 > Shannon entropy is a measure from information theory that quantifies the uncertainty or diversity in a dataset. In the context of energy:   
 > **Higher Entropy**: Indicates a more diverse energy mix, with energy production or capacity spread across multiple fuel sources.   
@@ -929,16 +942,21 @@ Although our results do not support a statistically significant relationship in 
 
 ---
 
-# Framing a Prediction Problem [TODO]
+# Framing a Prediction Problem
 
+To get a closer look into the relationship between our features and outage duration, we have decided to make our task be about predicting the average outage duration per state per year through regression. By predicting this response variable, we aim to provide a model that can derive average outage duration data catered to each state to more accurately. We will propose a baseline model, starting with linear regression, as it is one of the simpler models, with percent RMSE, the percentage of RMSE over the mean of the average duration per state per year feature.   
+
+Our features of interest include `climate_region`, `cause_cat`, `population`, `capacity_fuel_diversity_index`, and `generation_fuel_diversity_index`. These features are either fixed (e.g., geographic or categorical labels) or collected prior to the prediction year through public data sources, ensuring they would be available at the time of prediction. This respects the temporal constraint of not using information from after the event we aim to predict.   
 
 ---
 
 # Baseline Model
 
-First, we tried to use Linear Regression alone with all other covariates to predict the average duration of outages per year per state, but it was not fruitful as the RMSE was too high. This can be explained due to the nature of our testing set. As much as the model can learn from the training dataset with all the covariates in its hands, if it does not perform much worse than the training with the testing dataset, then we can consider it a good model. This is because it has shown some robustness against new, and possibly independent, data from outside the one it was trained from.
+First, we attempted Linear Regression using the covariates identified during the prediction problem formulation to predict the average outage duration per year per state. However, the results were not promising, as the RMSE was quite high. This is likely due to the nature of our test set. While the model learns from the training data with access to all covariates, it is important that its performance on the test set does not degrade significantly compared to training. If the model’s accuracy on the test set remains close to that on the training set, we consider it a good model because it demonstrates robustness to new, potentially independent data outside the training distribution.   
+**Our Linear Regression model's test MSE is 8,455,566.45.**
 
-However, we were suspicious of our findings, and so we looked further into how further test our model's predictive power. We came across Dummy Regression where our model would try to fit a constant line and failed. So then, we can conclude that the model we have is not great at predicting.
+
+We were suspicious of our findings, so we looked further into how further test our model's predictive power. We came across Dummy Regression where our model would try to fit a constant line and failed. So then, we can conclude that the model we have is not great at predicting. 
 
 To improve performance, we turned to **Random Forest Regression**, which is more flexible than linear regression and better suited for capturing non-linear relationships in the data. In this model, we used the following features to predict the **average outage duration** for each state per year:
 
@@ -948,15 +966,10 @@ To improve performance, we turned to **Random Forest Regression**, which is more
 - `capacity_fuel_diversity_index`
 - `generation_fuel_diversity_index`
 
-The resulting **Mean Squared Error (MSE)** for the Random Forest model was **4,983,457.59**, which is a substantial improvement over the baseline linear regression model.
+The resulting **Mean Squared Error (MSE)** for the Random Forest model was **4,983,457.59**, which is a substantial improvement over the baseline linear regression model. This is possiblty due to Random Forest Regression is more suited for non linear relationships and has deeper and more diverse ways to reduce bias and variance because of the way Random Forests are constructed from the training set.
 
 
 We can improve by choosing more variables to work with and let the RFG optimize based on that. We also want to be able to choose optimal hyperparameters in the form of tree depth and amount of trees to produce in order to find a balance between the bias and variance trade off. What we did here with RF was just not restricting its depth which can make it less optimal when getting prediction error.
-
-### Feature Selection Rationale
-+ Cause category and climate region (both are nominal as they do not have an apparent ordering) both are intuitively related to the duration of outages since they directly play into the reason for the outage occuring in the first place. So, it makes sense to include them to see if they have any contributions to predicting average duration. Both of them are going to be one hot encoded
-+ For population (quantitative), it is important to tell how much electricity is being distributed to each household on average and interesting to see if this is indeed something closely related to average outage duration. 
-+ capacity_fuel_diversity_index and generation_fuel_diversity_index are there to tell us information on the efficiency and supply of electricity. 
 
 | Metric                | Linear Regression | Random Forest       |
 |-----------------------|-------------------|---------------------|
@@ -964,6 +977,11 @@ We can improve by choosing more variables to work with and let the RFG optimize 
 | Test MSE              | 8,455,566.45      | 4,996,551.57        |
 | Test RMSE             | 111.28            | 85.54               |
 
+
+### Feature Selection Rationale
++ Cause category and climate region (both are nominal as they do not have an apparent ordering) both are intuitively related to the duration of outages since they directly play into the reason for the outage occuring in the first place. So, it makes sense to include them to see if they have any contributions to predicting average duration. Both of them are going to be one hot encoded
++ For population (quantitative), it is important to tell how much electricity is being distributed to each household on average and interesting to see if this is indeed something closely related to average outage duration. 
++ capacity_fuel_diversity_index and generation_fuel_diversity_index are there to tell us information on the efficiency and supply of electricity. 
 
 ---
 
@@ -1001,7 +1019,7 @@ Despite us showing you which columns have high correlation with one another, it 
 
 We would like to one hot encode the state column to see if there are any states that have have a say in the average duration of outages. Based on our EDA, it would seem that this may be the case due to the sheer amount of outages happening in some states. For example CA, TX, and WA have yearly outage count of over 20.
 
-Proposition
+### Proposition
 
 Since **Random Forest Regression** shows promise in the baseline model, performing a lot better than Linear Regression, we will choose to use it here for our model refinement. Through GridSearch cross validation, we hope to fine tune its hyperparameters (depth for overfitting, number of trees for variance reduction)
 
@@ -1019,6 +1037,15 @@ So we have decided to tune on the following hyperparameters:
 | `max_depth`   (int)         | Limits complexity; larger values may overfit                           |
 | `max_features`   (int)      | Controls the randomness of splits; smaller values = more diverse trees |
 | `bootstrap`   (boolean)         | Enables bootstrapping (random sampling with replacement)               |
+
+### Optimal model parameters
+Our best model settings were as follows: we disabled bootstrapping, allowed trees to grow up to a maximum depth of 50, used 200 trees in the forest, and for each split, the model considered the square root of the total features. These choices together gave us the best performance.
+
+### Improvement over baseline model 
+Our final tuned Random Forest model shows a noticeable improvement compared to the baseline model. Key hyperparameters were adjusted as follows: the maximum tree depth was reduced from unlimited to 30 to prevent overfitting, the number of trees was decreased from 2000 to 500 for efficiency, the number of features considered at each split changed from using all features (auto) to the square root of features (sqrt), and bootstrapping was disabled.
+
+These changes resulted in a reduction of the RMSE on the test set from 2235.30 to 2166.94, representing a 3.06% decrease in error. The percent RMSE similarly improved by approximately 2.62%, indicating better predictive accuracy and generalization of the tuned model over the baseline.
+
 
 | **Metric**          | **Baseline RF Model** | **Tuned RF Model** | **Improvement** |
 | ------------------- | --------------------- | ------------------ | --------------- |
@@ -1047,16 +1074,10 @@ The permutation test yielded a p-value of approximately `0.003992`, which is wel
 
 This finding highlights that while the model captures general trends, it might under- or over-estimate outage durations associated with severe weather events compared to other causes. Addressing this disparity could be important to improve model fairness and ensure it reliably informs decisions related to natural cause outages.
 
-
-
-
 ---
-
-
-
 
 # Contributors 
 
 Jiaying Chen| [github](https://github.com/rcwoshimao) | [linkedin](https://www.linkedin.com/in/jiaying-chen01/)  
-Minh Hoang | [github](https://github.com/thekingofrice) | [linkedin](https://www.linkedin.com/in/duc-minh-hoang-711029296/)
+Duc Minh Hoang | [github](https://github.com/thekingofrice) | [linkedin](https://www.linkedin.com/in/duc-minh-hoang-711029296/)
 
