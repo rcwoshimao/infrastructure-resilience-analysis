@@ -1061,7 +1061,7 @@ These changes resulted in a reduction of the RMSE on the test set from 2235.30 t
 # Fairness Analysis
 To assess model fairness, we choose group the cause category by severe weather or no severe weather. Since our model focuses on average duration based on the predictive power of population, geographical, and energy generation/storage factors, we want to know if the model is actually performing well on severe weather or not. This is an interesting way to answer the question of "How good is the model in identifying natural causes and appropriate assign weights to those causes so that it is predicting average duration fairly?". We will see whether or not our model is robust under why the outage happened. 
 
-it is fitting to test whether or not the model performs well on different groups of climate categories. Specifically, we want to see if the average outage duration is well modeled on severe weather and no severe weather in hopes to bring up awareness of risks that come with outages.
+It is fitting to test whether or not the model performs well on different groups of climate categories. Specifically, we want to see if the average outage duration is well modeled on severe weather and no severe weather in hopes to bring up awareness of risks that come with outages.
 
 <iframe
   src="assets/plots/fairness.html"
